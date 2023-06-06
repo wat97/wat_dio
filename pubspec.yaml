@@ -1,0 +1,18 @@
+name: wat_dio
+description: An HTTP module derived from Dio is designed to handle refresh tokens in JWT.
+version: 0.0.1
+homepage:
+
+environment:
+  sdk: '>=2.18.6 <3.0.0'
+  flutter: ">=1.17.0"
+
+dependencies:
+  dio: ^5.1.2
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
