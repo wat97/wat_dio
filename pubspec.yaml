@@ -1,5 +1,6 @@
 name: wat_dio
 description: An HTTP module derived from Dio is designed to handle refresh tokens in JWT.
+repository: https://github.com/wat97/wat_dio
 version: 0.0.1
 homepage:
 
