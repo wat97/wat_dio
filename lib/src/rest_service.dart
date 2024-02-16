@@ -126,11 +126,11 @@ class RestService {
     required Future<RestModel<R>> Function() sendRequest,
   }) async {
     final response = await sendRequest();
-    print(
-        "handleRefresh ${response.body} (${response.statusCode}) (${HttpStatus.unauthorized})");
     if (response.statusCode == HttpStatus.unauthorized) {
       if (refreshToken != null) {
         _idToken = await refreshToken!();
+        print(
+            "handleRefresh ${response.body} (${response.statusCode}) (${HttpStatus.unauthorized}) [$_idToken] ");
         _dio.options.headers.addAll(_headers);
       }
       return await sendRequest();
