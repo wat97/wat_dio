@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,9 +9,6 @@ import 'package:wat_dio/wat_dio.dart';
 void main() {
   test('Test Api', () async {
     String baseApi = "https://rickandmortyapi.com/api";
-    BaseOptions dioOptions = BaseOptions(
-      baseUrl: baseApi,
-    );
     final dio = Dio(
       BaseOptions(
         baseUrl: baseApi,
@@ -36,9 +32,6 @@ void main() {
 
   test('Test Refresh Token ', () async {
     String baseApi = "https://rickandmortyapi.com/api";
-    BaseOptions dioOptions = BaseOptions(
-      baseUrl: baseApi,
-    );
     final dio = Dio(
       BaseOptions(
         baseUrl: baseApi,
@@ -62,9 +55,6 @@ void main() {
 
   test('Test Degress ', () async {
     String baseApi = "https://api.3degrees.app/";
-    BaseOptions dioOptions = BaseOptions(
-      baseUrl: baseApi,
-    );
     final dio = Dio(
       BaseOptions(
         baseUrl: baseApi,
@@ -81,7 +71,6 @@ void main() {
       endpoint: "campaigns",
     );
     BaseModel baseModel = BaseModel.fromJson(result.body);
-    List<ResultModel> listResult = [];
     for (var element in (baseModel.result as List)) {
       ResultModel modelElement =
           ResultModel.fromJson(json.decode(json.encode(element)));
@@ -103,9 +92,6 @@ void main() {
     ];
 
     String baseApi = "https://dev-app.tradeinplus.id/v1/api/config/get/";
-    BaseOptions dioOptions = BaseOptions(
-      baseUrl: baseApi,
-    );
     final dio = Dio(
       BaseOptions(
         baseUrl: baseApi,
