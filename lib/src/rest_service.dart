@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:wat_dio/src/wat_interceptor.dart';
 
 import 'model/model.dart';
 import 'typedefs.dart';
@@ -9,11 +10,14 @@ class RestService {
   /// [Dio] client
   final Dio _dio;
   final Future<String> Function()? refreshToken;
+  Future<void> Function(Response response, ResponseInterceptorHandler handler)
+      expiredToken;
 
   String? _idToken;
 
   RestService({
     required Dio dioClient,
+    required this.expiredToken,
     this.refreshToken,
     String? idToken,
     Iterable<Interceptor>? interceptors,
@@ -22,6 +26,10 @@ class RestService {
         _idToken = idToken {
     if (interceptors != null) _dio.interceptors.addAll(interceptors);
     if (httpClientAdapter != null) _dio.httpClientAdapter = httpClientAdapter;
+    _dio.interceptors.add(WatInterceptor(
+      refreshToken: refreshToken!,
+      expiredToken: expiredToken,
+    ));
   }
 
   JSON get _headers => {
@@ -73,18 +81,18 @@ class RestService {
     Options? options,
     void Function(int count, int total)? onSendProgress,
   }) async {
-    return handleRefreshToken(sendRequest: () async {
-      _dio.options.headers.addAll(_headers);
-      final response = await _dio.post(
-        endpoint,
-        data: data,
-        queryParameters: queryParams,
-        options: options,
-        onSendProgress: onSendProgress,
-      );
+    // return handleRefreshToken(sendRequest: () async {
+    _dio.options.headers.addAll(_headers);
+    final response = await _dio.post(
+      endpoint,
+      data: data,
+      queryParameters: queryParams,
+      options: options,
+      onSendProgress: onSendProgress,
+    );
 
-      return RestModel<R>.fromJson(response);
-    });
+    return RestModel<R>.fromJson(response);
+    // });
   }
 
   /// This method sends a `PUT` request to the [endpoint], **decodes**

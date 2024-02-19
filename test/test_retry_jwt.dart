@@ -43,15 +43,26 @@ void main() {
             validateStatus: (status) {
               return true;
             },
+            receiveTimeout: const Duration(
+              microseconds: 10,
+            ),
           ),
         );
-        print("resultRefresh ${result.data}");
-        // final model = ModelBaseApiV2.fromJson(result.data);
-        // var tokenNew = "";
-        // if (model.success) {
-        //   tokenNew = model.data['token'];
-        // }
-        return "tokenNew";
+        // print("resultRefresh ${result.data["success"]}");
+        // print("resultRefresh ${result.data["data"]["token"]}");
+        if (result.data["success"]) {
+          try {
+            return result.data["data"]["token"];
+          } catch (e) {
+            return "";
+          }
+        } else {
+          return "";
+        }
+      },
+      expiredToken: (response, handler) async {
+        print("ClearExpired ");
+        return handler.next(response);
       },
     );
     var formData = FormData.fromMap(

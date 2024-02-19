@@ -30,4 +30,4 @@ migrate_working_dir/
 build/
 lib/model/*
 lib/model
-# test/test_retry_jwt.dart
+test/test_retry_jwt.dart
