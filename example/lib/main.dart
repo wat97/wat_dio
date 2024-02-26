@@ -3,7 +3,7 @@ import 'package:wat_dio/wat_dio.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(
+      home: const MyHomePage(
         title: 'title',
       ),
     );
@@ -51,12 +51,12 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
+            const Text(
               'text_home',
             ),
             Text(
               '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+              style: Theme.of(context).textTheme.headlineLarge,
             ),
           ],
         ),
@@ -70,9 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
           FloatingActionButton(
             onPressed: () async {
               String baseApi = "https://rickandmortyapi.com/api";
-              BaseOptions dioOptions = BaseOptions(
-                baseUrl: baseApi,
-              );
+
               final dio = Dio(
                 BaseOptions(
                   baseUrl: baseApi,
@@ -81,13 +79,16 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                 ),
               );
-              var service = RestService(dioClient: dio);
+              var service = RestService(
+                  dioClient: dio,
+                  expiredToken: (Response<dynamic> response,
+                      ResponseInterceptorHandler handler) async {});
               await service.get(endpoint: "");
             },
             tooltip: 'Test Api Client',
             child: const Text("Api"),
           ),
-          Spacer(),
+          const Spacer(),
           FloatingActionButton(
             onPressed: _incrementCounter,
             tooltip: 'Increment',
