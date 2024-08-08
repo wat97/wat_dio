@@ -12,4 +12,4 @@ Add `wat_dio` to the `dependencies` section in your `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  wat_dio: ^0.0.1
+  wat_dio: ^0.0.3

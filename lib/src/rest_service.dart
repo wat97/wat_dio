@@ -125,6 +125,45 @@ class RestService {
     });
   }
 
+  /// This method sends a `DOWNLOAD` request to the [endpoint], **decodes**
+  /// the response and returns a parsed [RestModel] with a body of type [R].
+  ///
+  /// Any errors encountered during the request are caught and a custom
+  ///
+  /// [queryParams] holds any query parameters for the request.
+  ///
+  /// [options] are special instructions that can be merged with the request.
+  ///
+  /// [onReceiveProgress] are To receive progress when receive api
+  ///
+  Future<RestModel<R>> download<R>({
+    required String endpoint,
+    required dynamic savePath,
+    JSON? queryParams,
+    Options? options,
+    void Function(int count, int total)? onReceiveProgress,
+    bool deleteOnError = true,
+    String lengthHeader = Headers.contentLengthHeader,
+    dynamic data,
+  }) async {
+    return handleRefreshToken(
+      sendRequest: () async {
+        _dio.options.headers.addAll(_headers);
+        final response = await _dio.download(
+          endpoint,
+          savePath,
+          queryParameters: queryParams,
+          options: options,
+          onReceiveProgress: onReceiveProgress,
+          lengthHeader: lengthHeader,
+          data: data,
+          deleteOnError: deleteOnError,
+        );
+        return RestModel<R>.fromJson(response);
+      },
+    );
+  }
+
   /// This method to handle if token is expired
   /// the response and returns a parsed [RestModel] with a body of type [R].
   ///

@@ -1,11 +1,15 @@
-## 0.0.1
+## 0.0.4
 
-* Init Release
+* Added Download 
+
+## 0.0.3
+
+* Performance Improvement
 
 ## 0.0.2
 
 * Bug Fixing issue Unhandled Exception: DioError [DioErrorType.other]: Bad state: Can't finalize a finalized MultipartFile.
 
-## 0.0.3
+## 0.0.1
 
-* Performance Improvement
+* Init Release
