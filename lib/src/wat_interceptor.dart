@@ -2,41 +2,58 @@ import 'dart:io';
 
 import 'package:wat_dio/wat_dio.dart';
 
-class WatInterceptor implements InterceptorsWrapper {
-  Future<String> Function() refreshToken;
-  Future<void> Function(Response response, ResponseInterceptorHandler handler)
-      expiredToken;
+const _retryAttemptedKey = '_watDioRetryAttempted';
+
+class WatInterceptor extends Interceptor {
   WatInterceptor({
+    required this.dio,
     required this.refreshToken,
     required this.expiredToken,
+    this.onRefreshSuccess,
   });
+
+  final Dio dio;
+  final Future<String> Function() refreshToken;
+  final Future<void> Function(
+    Response response,
+    ResponseInterceptorHandler handler,
+  ) expiredToken;
+  final void Function(String token)? onRefreshSuccess;
+
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    return handler.next(err);
+    handler.next(err);
   }
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    return handler.next(options);
+    handler.next(options);
   }
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) async {
     switch (response.statusCode) {
       case HttpStatus.unauthorized:
-        String tokenJWT = await refreshToken();
+        if (response.requestOptions.extra[_retryAttemptedKey] == true) {
+          await expiredToken(response, handler);
+          return;
+        }
+
+        final tokenJWT = await refreshToken();
         if (tokenJWT.isEmpty) {
           await expiredToken(response, handler);
-        } else {
-          await retryHit(response, handler, tokenJWT);
+          return;
         }
-        break;
+
+        onRefreshSuccess?.call(tokenJWT);
+        await retryHit(response, handler, tokenJWT);
+        return;
       case HttpStatus.forbidden:
       case HttpStatus.notAcceptable:
         await expiredToken(response, handler);
-        break;
+        return;
       default:
-        return handler.next(response);
+        handler.next(response);
     }
   }
 
@@ -45,45 +62,35 @@ class WatInterceptor implements InterceptorsWrapper {
     ResponseInterceptorHandler handler,
     String token,
   ) async {
-    response.requestOptions.headers.addAll(
-      {
+    final requestOptions = response.requestOptions.copyWith(
+      data: _cloneData(response.requestOptions.data),
+      headers: {
+        ...response.requestOptions.headers,
         'Authorization': 'Bearer $token',
+      },
+      extra: {
+        ...response.requestOptions.extra,
+        _retryAttemptedKey: true,
       },
     );
 
-    final opts = Options(
-      method: response.requestOptions.method,
-      headers: response.requestOptions.headers,
-      followRedirects: response.requestOptions.followRedirects,
-      extra: response.requestOptions.extra,
-      contentType: response.requestOptions.contentType,
-      validateStatus: response.requestOptions.validateStatus,
-    );
+    final cloneReq = await dio.fetch<dynamic>(requestOptions);
+    handler.resolve(cloneReq);
+  }
 
-    FormData formData = FormData();
-    if (response.requestOptions.data is FormData) {
-      formData.fields.addAll(response.requestOptions.data.fields);
-      for (MapEntry mapFile in response.requestOptions.data.files) {
-        formData.files.add(
-          MapEntry(
-            mapFile.key,
-            MultipartFile.fromFileSync(
-              mapFile.value.FILE_PATH,
-              filename: mapFile.value.filename,
-            ),
-          ),
-        );
-        response.requestOptions.data = formData;
-      }
+  dynamic _cloneData(dynamic data) {
+    if (data is! FormData) return data;
+
+    final formData = FormData();
+    formData.fields.addAll(data.fields);
+    for (final entry in data.files) {
+      formData.files.add(
+        MapEntry(
+          entry.key,
+          entry.value.clone(),
+        ),
+      );
     }
-
-    // print("cloneReq Before ${formData.fields}");
-    final cloneReq = await Dio().request(
-      response.requestOptions.path,
-      options: opts,
-      data: formData,
-      queryParameters: response.requestOptions.queryParameters,
-    );
-    return handler.resolve(cloneReq);
+    return formData;
   }
 }

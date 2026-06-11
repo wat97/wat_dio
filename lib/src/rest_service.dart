@@ -12,6 +12,7 @@ class RestService {
   final Future<String> Function()? refreshToken;
   Future<void> Function(Response response, ResponseInterceptorHandler handler)
       expiredToken;
+  final bool _hasRefreshInterceptor;
 
   String? _idToken;
 
@@ -23,13 +24,23 @@ class RestService {
     Iterable<Interceptor>? interceptors,
     HttpClientAdapter? httpClientAdapter,
   })  : _dio = dioClient,
+        _hasRefreshInterceptor = refreshToken != null,
         _idToken = idToken {
     if (interceptors != null) _dio.interceptors.addAll(interceptors);
     if (httpClientAdapter != null) _dio.httpClientAdapter = httpClientAdapter;
-    _dio.interceptors.add(WatInterceptor(
-      refreshToken: refreshToken!,
-      expiredToken: expiredToken,
-    ));
+    if (refreshToken != null) {
+      _dio.interceptors.add(
+        WatInterceptor(
+          dio: _dio,
+          refreshToken: refreshToken!,
+          expiredToken: expiredToken,
+          onRefreshSuccess: (token) {
+            _idToken = token;
+            _dio.options.headers.addAll(_headers);
+          },
+        ),
+      );
+    }
   }
 
   JSON get _headers => {
@@ -81,18 +92,18 @@ class RestService {
     Options? options,
     void Function(int count, int total)? onSendProgress,
   }) async {
-    // return handleRefreshToken(sendRequest: () async {
-    _dio.options.headers.addAll(_headers);
-    final response = await _dio.post(
-      endpoint,
-      data: data,
-      queryParameters: queryParams,
-      options: options,
-      onSendProgress: onSendProgress,
-    );
+    return handleRefreshToken(sendRequest: () async {
+      _dio.options.headers.addAll(_headers);
+      final response = await _dio.post(
+        endpoint,
+        data: data,
+        queryParameters: queryParams,
+        options: options,
+        onSendProgress: onSendProgress,
+      );
 
-    return RestModel<R>.fromJson(response);
-    // });
+      return RestModel<R>.fromJson(response);
+    });
   }
 
   /// This method sends a `PUT` request to the [endpoint], **decodes**
@@ -173,12 +184,14 @@ class RestService {
     required Future<RestModel<R>> Function() sendRequest,
   }) async {
     final response = await sendRequest();
-    if (response.statusCode == HttpStatus.unauthorized) {
-      if (refreshToken != null) {
-        _idToken = await refreshToken!();
-
-        _dio.options.headers.addAll(_headers);
+    if (response.statusCode == HttpStatus.unauthorized &&
+        refreshToken != null &&
+        !_hasRefreshInterceptor) {
+      _idToken = await refreshToken!();
+      if (_idToken == null || _idToken!.isEmpty) {
+        return response;
       }
+      _dio.options.headers.addAll(_headers);
       return await sendRequest();
     }
     return response;
