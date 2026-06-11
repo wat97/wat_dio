@@ -121,3 +121,31 @@ Expected: files formatted, no semantic changes
 
 Run: `git diff --stat`
 Expected: only intended library, test, and doc changes
+
+### Task 6: Audit Dio version floor before next release
+
+**Files:**
+- Modify: `pubspec.yaml`
+- Modify: `docs/roadmap.md`
+- Check: `test/wat_dio_test.dart`
+
+- [ ] **Step 1: Inspect currently resolved `dio` version**
+
+Run: `flutter pub deps | grep dio`
+Expected: see exact `dio` 5.x version currently resolved in workspace or consuming app.
+
+- [ ] **Step 2: Verify package behavior against latest supported `dio` 5.x**
+
+Run: `flutter test`
+Expected: PASS with latest resolved `dio` in major version 5.
+
+- [ ] **Step 3: Decide minimum version policy**
+
+If latest `dio` 5.x passes cleanly, choose one:
+
+- keep `dio: ^5.1.2` to maximize consumer compatibility
+- raise minimum to newer `5.x` only if package depends on newer fixes or APIs
+
+- [ ] **Step 4: Document decision**
+
+Update `docs/roadmap.md` and, if needed, `pubspec.yaml` with chosen minimum-version policy and rationale.

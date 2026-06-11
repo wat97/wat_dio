@@ -48,3 +48,4 @@ Every auth-related change should update:
 - replace integration-only tests with deterministic unit tests
 - upgrade example app from counter demo to auth demo
 - add multipart retry regression tests
+- audit resolved `dio` 5.x version in consumer apps, test against latest `5.9.2`, and only then decide whether minimum supported version should move up from `^5.1.2`
