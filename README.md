@@ -18,7 +18,7 @@ HTTP wrapper on top of `dio` for Flutter apps that need JWT bearer auth, refresh
 - Auto-attach `Authorization: Bearer <token>` when `idToken` exists
 - Refresh-token callback for expired access tokens
 - Expired-session callback for unrecoverable auth states
-- Typed `RestModel<T>` response wrapper for `get`, `post`, `put`, and `download`
+- Typed `RestModel<T>` response wrapper for `get`, `post`, `put`, `patch`, `delete`, and `download`
 
 ## Installation
 
@@ -68,6 +68,13 @@ final result = await service.get<Map<String, dynamic>>(
 
 print(result.statusCode);
 print(result.body);
+
+await service.patch<Map<String, dynamic>>(
+  endpoint: '/profile',
+  data: {
+    'nickname': 'wat',
+  },
+);
 ```
 
 ## Auth Flow
@@ -100,6 +107,8 @@ Main methods on `RestService`:
 Future<RestModel<R>> get<R>({...})
 Future<RestModel<R>> post<R>({...})
 Future<RestModel<R>> put<R>({...})
+Future<RestModel<R>> patch<R>({...})
+Future<RestModel<R>> delete<R>({...})
 Future<RestModel<R>> download<R>({...})
 ```
 
@@ -118,7 +127,7 @@ class RestModel<T> {
 This package works today, but current release behavior is important to understand before production use:
 
 - `refreshToken` is optional. When omitted, requests still work but no automatic refresh happens on `401`.
-- `get`, `post`, `put`, and `download` now follow same auth-refresh contract.
+- `get`, `post`, `put`, `patch`, `delete`, and `download` now follow same auth-refresh contract.
 - Retry logic reuses same configured `Dio` client, so base URL, adapter, and client configuration stay intact.
 - `expiredToken(...)` still owns unrecoverable auth behavior such as logout or session reset.
 

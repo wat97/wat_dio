@@ -107,6 +107,86 @@ void main() {
       );
     });
 
+    test('patch retries once after 401 with refreshed token', () async {
+      final adapter = _RecordingAdapter([
+        const _PlannedResponse(statusCode: 401, body: {'message': 'expired'}),
+        const _PlannedResponse(statusCode: 200, body: {'updated': true}),
+      ]);
+
+      final dio = _buildDio(adapter);
+      var refreshCalls = 0;
+
+      final service = RestService(
+        dioClient: dio,
+        idToken: 'old-token',
+        refreshToken: () async {
+          refreshCalls++;
+          return 'new-token';
+        },
+        expiredToken: (response, handler) async {
+          handler.next(response);
+        },
+      );
+
+      final result = await service.patch<Map<String, dynamic>>(
+        endpoint: '/profile',
+        data: {'nickname': 'wat'},
+      );
+
+      expect(result.statusCode, 200);
+      expect(result.body['updated'], isTrue);
+      expect(refreshCalls, 1);
+      expect(adapter.requests, hasLength(2));
+      expect(adapter.requests.last.method, 'PATCH');
+      expect(adapter.requests.last.data, {'nickname': 'wat'});
+      expect(
+        adapter.requests.last.headers['Authorization'],
+        'Bearer new-token',
+      );
+    });
+
+    test('delete retries once after 401 with refreshed token', () async {
+      final adapter = _RecordingAdapter([
+        const _PlannedResponse(statusCode: 401, body: {'message': 'expired'}),
+        const _PlannedResponse(statusCode: 200, body: {'deleted': true}),
+      ]);
+
+      final dio = _buildDio(adapter);
+      var refreshCalls = 0;
+
+      final service = RestService(
+        dioClient: dio,
+        idToken: 'old-token',
+        refreshToken: () async {
+          refreshCalls++;
+          return 'new-token';
+        },
+        expiredToken: (response, handler) async {
+          handler.next(response);
+        },
+      );
+
+      final result = await service.delete<Map<String, dynamic>>(
+        endpoint: '/profile',
+        data: {'hard': true},
+      );
+
+      expect(result.statusCode, 200);
+      expect(result.body['deleted'], isTrue);
+      expect(refreshCalls, 1);
+      expect(adapter.requests, hasLength(2));
+      expect(adapter.requests.last.method, 'DELETE');
+      expect(adapter.requests.last.data, {'hard': true});
+      expect(
+        adapter.requests.last.headers['Authorization'],
+        'Bearer new-token',
+      );
+      expect(
+        adapter.requests.last.uri.toString(),
+        'https://example.com/profile',
+      );
+    });
+
     test('expiredToken is called when refresh token is empty', () async {
       final adapter = _RecordingAdapter([
         const _PlannedResponse(statusCode: 401, body: {'message': 'expired'}),

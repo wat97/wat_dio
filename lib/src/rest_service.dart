@@ -7,7 +7,7 @@ import 'model/model.dart';
 import 'typedefs.dart';
 
 class RestService {
-  /// [Dio] client
+  /// Internal [Dio] client used for all requests.
   final Dio _dio;
   final Future<String> Function()? refreshToken;
   Future<void> Function(Response response, ResponseInterceptorHandler handler)
@@ -47,17 +47,11 @@ class RestService {
         if (_idToken != null) 'Authorization': 'Bearer $_idToken',
       };
 
-  /// This method sends a `GET` request to the [endpoint], **decodes**
-  /// the response and returns a parsed [RestModel] with a body of type [R].
+  /// Sends a `GET` request to [endpoint] and returns a typed [RestModel].
   ///
-  /// Any errors encountered during the request are caught and a custom
-  ///
-  /// [queryParams] holds any query parameters for the request.
-  ///
-  /// [options] are special instructions that can be merged with the request.
-  ///
-  /// [onReceiveProgress] are To receive progress when receive api
-  ///
+  /// Use [queryParams] to send query string values.
+  /// Use [options] to override request configuration.
+  /// Use [onReceiveProgress] to observe response download progress.
   Future<RestModel<R>> get<R>({
     required String endpoint,
     JSON? queryParams,
@@ -76,15 +70,12 @@ class RestService {
     });
   }
 
-  /// This method sends a `POST` request to the [endpoint], **decodes**
-  /// the response and returns a parsed [RestModel] with a body of type [R].
+  /// Sends a `POST` request to [endpoint] and returns a typed [RestModel].
   ///
-  /// The [data] contains body for the request.
-  ///
-  /// [options] are special instructions that can be merged with the request.
-  ///
-  /// [onSendProgress] are To receive progress when upload api
-  ///
+  /// Use [data] to provide request body content.
+  /// Use [queryParams] to send query string values.
+  /// Use [options] to override request configuration.
+  /// Use [onSendProgress] to observe upload progress.
   Future<RestModel<R>> post<R>({
     required String endpoint,
     Object? data,
@@ -106,15 +97,12 @@ class RestService {
     });
   }
 
-  /// This method sends a `PUT` request to the [endpoint], **decodes**
-  /// the response and returns a parsed [RestModel] with a body of type [R].
+  /// Sends a `PUT` request to [endpoint] and returns a typed [RestModel].
   ///
-  /// The [data] contains body for the request.
-  ///
-  /// [options] are special instructions that can be merged with the request.
-  ///
-  /// [onSendProgress] are To receive progress when upload api
-  ///
+  /// Use [data] to provide request body content.
+  /// Use [queryParams] to send query string values.
+  /// Use [options] to override request configuration.
+  /// Use [onSendProgress] to observe upload progress.
   Future<RestModel<R>> put<R>({
     required String endpoint,
     Object? data,
@@ -136,17 +124,63 @@ class RestService {
     });
   }
 
-  /// This method sends a `DOWNLOAD` request to the [endpoint], **decodes**
-  /// the response and returns a parsed [RestModel] with a body of type [R].
+  /// Sends a `PATCH` request to [endpoint] and returns a typed [RestModel].
   ///
-  /// Any errors encountered during the request are caught and a custom
+  /// Use [data] to provide request body content.
+  /// Use [queryParams] to send query string values.
+  /// Use [options] to override request configuration.
+  /// Use [onSendProgress] to observe upload progress.
+  Future<RestModel<R>> patch<R>({
+    required String endpoint,
+    Object? data,
+    JSON? queryParams,
+    Options? options,
+    void Function(int count, int total)? onSendProgress,
+  }) async {
+    return handleRefreshToken(sendRequest: () async {
+      _dio.options.headers.addAll(_headers);
+      final response = await _dio.patch(
+        endpoint,
+        data: data,
+        queryParameters: queryParams,
+        options: options,
+        onSendProgress: onSendProgress,
+      );
+
+      return RestModel<R>.fromJson(response);
+    });
+  }
+
+  /// Sends a `DELETE` request to [endpoint] and returns a typed [RestModel].
   ///
-  /// [queryParams] holds any query parameters for the request.
+  /// Use [data] to provide request body content when your API supports it.
+  /// Use [queryParams] to send query string values.
+  /// Use [options] to override request configuration.
+  Future<RestModel<R>> delete<R>({
+    required String endpoint,
+    Object? data,
+    JSON? queryParams,
+    Options? options,
+  }) async {
+    return handleRefreshToken(sendRequest: () async {
+      _dio.options.headers.addAll(_headers);
+      final response = await _dio.delete(
+        endpoint,
+        data: data,
+        queryParameters: queryParams,
+        options: options,
+      );
+
+      return RestModel<R>.fromJson(response);
+    });
+  }
+
+  /// Sends a `DOWNLOAD` request to [endpoint] and returns a typed [RestModel].
   ///
-  /// [options] are special instructions that can be merged with the request.
-  ///
-  /// [onReceiveProgress] are To receive progress when receive api
-  ///
+  /// Use [savePath] to choose where downloaded content is written.
+  /// Use [queryParams] to send query string values.
+  /// Use [options] to override request configuration.
+  /// Use [onReceiveProgress] to observe download progress.
   Future<RestModel<R>> download<R>({
     required String endpoint,
     required dynamic savePath,
@@ -175,11 +209,10 @@ class RestService {
     );
   }
 
-  /// This method to handle if token is expired
-  /// the response and returns a parsed [RestModel] with a body of type [R].
+  /// Replays [sendRequest] one time when a `401` needs refresh handling.
   ///
-  /// The [sendRequest] contains function to [post] or [get] method call before.
-  ///
+  /// This fallback is used only when automatic interceptor-based refresh is not
+  /// installed for current service instance.
   Future<RestModel<R>> handleRefreshToken<R>({
     required Future<RestModel<R>> Function() sendRequest,
   }) async {

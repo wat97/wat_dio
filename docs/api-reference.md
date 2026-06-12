@@ -74,7 +74,7 @@ Future<RestModel<R>> get<R>({
 })
 ```
 
-Sends GET request, wraps result in `RestModel<R>`, and uses service-level refresh handling.
+Sends GET request and wraps result in `RestModel<R>`.
 
 ### `post<R>()`
 
@@ -102,7 +102,34 @@ Future<RestModel<R>> put<R>({
 })
 ```
 
-Sends PUT request, wraps result, and uses service-level refresh handling.
+Sends PUT request and wraps result in `RestModel<R>`.
+
+### `patch<R>()`
+
+```dart
+Future<RestModel<R>> patch<R>({
+  required String endpoint,
+  Object? data,
+  Map<String, dynamic>? queryParams,
+  Options? options,
+  void Function(int count, int total)? onSendProgress,
+})
+```
+
+Sends PATCH request and wraps result in `RestModel<R>`.
+
+### `delete<R>()`
+
+```dart
+Future<RestModel<R>> delete<R>({
+  required String endpoint,
+  Object? data,
+  Map<String, dynamic>? queryParams,
+  Options? options,
+})
+```
+
+Sends DELETE request and wraps result in `RestModel<R>`.
 
 ### `download<R>()`
 
@@ -120,6 +147,12 @@ Future<RestModel<R>> download<R>({
 ```
 
 Downloads remote content and wraps resulting response.
+
+All request methods above follow same auth-refresh contract:
+
+- when `idToken` exists, request includes bearer token
+- when `refreshToken` exists, `401` can trigger refresh and one retry
+- when refresh fails or auth is unrecoverable, `expiredToken(...)` handles session-expired flow
 
 ## `RestModel<T>`
 
