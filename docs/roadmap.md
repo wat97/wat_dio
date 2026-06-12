@@ -34,6 +34,17 @@ Docs should evolve with code in these areas:
 4. expand example app into realistic auth demo
 5. consider clearer internal separation between retry and session-expired handling
 
+## Current Dependency Policy
+
+`dio` minimum supported version should now be `^5.3.1`.
+
+Reason:
+
+- workspace resolves cleanly to `dio 5.9.2`
+- package test suite passes on `dio 5.9.2`
+- current retry implementation depends on request-copy and multipart-clone behavior that was improved in `dio 5.3.x`
+- keeping `^5.1.2` would over-promise compatibility below what current implementation is designed and tested for
+
 ## Documentation Update Policy
 
 Every auth-related change should update:
@@ -48,4 +59,4 @@ Every auth-related change should update:
 - replace integration-only tests with deterministic unit tests
 - upgrade example app from counter demo to auth demo
 - add multipart retry regression tests
-- audit resolved `dio` 5.x version in consumer apps, test against latest `5.9.2`, and only then decide whether minimum supported version should move up from `^5.1.2`
+- monitor future `dio 5.x` releases and rerun regression tests before any minimum-version bump beyond `^5.3.1`
