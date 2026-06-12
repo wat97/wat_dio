@@ -50,9 +50,9 @@ Reason:
 Every auth-related change should update:
 
 - `README.md` when user-facing behavior changes
-- `docs/auth-flow.md` when callback or status handling changes
-- `docs/api-reference.md` when signatures or guarantees change
-- `docs/roadmap.md` when priorities change
+- `doc/auth-flow.md` when callback or status handling changes
+- `doc/api-reference.md` when signatures or guarantees change
+- `doc/roadmap.md` when priorities change
 
 ## Suggested Next Work
 

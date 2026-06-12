@@ -108,5 +108,5 @@ Cover:
 - Modify `lib/src/wat_interceptor.dart`
 - Replace `test/wat_dio_test.dart`
 - Update `README.md`
-- Update `docs/auth-flow.md`
-- Update `docs/api-reference.md`
+- Update `doc/auth-flow.md`
+- Update `doc/api-reference.md`

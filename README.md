@@ -88,10 +88,10 @@ await service.patch<Map<String, dynamic>>(
 
 See more:
 
-- [Architecture](docs/architecture.md)
-- [Auth flow](docs/auth-flow.md)
-- [API reference](docs/api-reference.md)
-- [Roadmap](docs/roadmap.md)
+- [Architecture](doc/architecture.md)
+- [Auth flow](doc/auth-flow.md)
+- [API reference](doc/api-reference.md)
+- [Roadmap](doc/roadmap.md)
 
 ## API Overview
 
@@ -149,9 +149,9 @@ Current example is minimal. Planned direction:
 When changing auth behavior, update docs in same pull request:
 
 - `README.md`
-- `docs/auth-flow.md`
-- `docs/api-reference.md`
-- `docs/roadmap.md`
+- `doc/auth-flow.md`
+- `doc/api-reference.md`
+- `doc/roadmap.md`
 
 ## License
 

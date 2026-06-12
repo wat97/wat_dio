@@ -82,8 +82,8 @@ Expected: PASS
 
 **Files:**
 - Modify: `README.md`
-- Modify: `docs/auth-flow.md`
-- Modify: `docs/api-reference.md`
+- Modify: `doc/auth-flow.md`
+- Modify: `doc/api-reference.md`
 
 - [ ] **Step 1: Update behavior notes**
 
@@ -104,8 +104,8 @@ Check README and docs align with code behavior.
 - Check: `lib/src/wat_interceptor.dart`
 - Check: `test/wat_dio_test.dart`
 - Check: `README.md`
-- Check: `docs/auth-flow.md`
-- Check: `docs/api-reference.md`
+- Check: `doc/auth-flow.md`
+- Check: `doc/api-reference.md`
 
 - [ ] **Step 1: Run full test suite**
 
@@ -126,7 +126,7 @@ Expected: only intended library, test, and doc changes
 
 **Files:**
 - Modify: `pubspec.yaml`
-- Modify: `docs/roadmap.md`
+- Modify: `doc/roadmap.md`
 - Check: `test/wat_dio_test.dart`
 
 - [ ] **Step 1: Inspect currently resolved `dio` version**
@@ -148,4 +148,4 @@ If latest `dio` 5.x passes cleanly, choose one:
 
 - [ ] **Step 4: Document decision**
 
-Update `docs/roadmap.md` and, if needed, `pubspec.yaml` with chosen minimum-version policy and rationale.
+Update `doc/roadmap.md` and, if needed, `pubspec.yaml` with chosen minimum-version policy and rationale.
