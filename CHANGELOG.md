@@ -1,3 +1,9 @@
+## 0.0.5
+
+* Added `patch` and `delete` helpers to `RestService`.
+* Improved auth refresh retry flow to reuse same configured `Dio` client.
+* Updated package documentation and publish layout.
+
 ## 0.0.4
 
 * Added Download 
